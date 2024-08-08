@@ -19,6 +19,7 @@ services:
     runtime: node
     region: frankfurt
     buildCommand: cd server && npm install && npx @nestjs/cli build
+    preDeployCommand: npm i --save-dev @types/node
     startCommand: cd server && npm run start:prod
     envVars:
       - key: PORT
