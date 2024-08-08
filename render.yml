@@ -1,0 +1,39 @@
+services:
+  - type: web
+    plan: free
+    name: client
+    runtime: node
+    region: frankfurt
+    buildCommand: cd client && npm install && npm run build
+    startCommand: cd server && npm run production
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          name: server
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+
+  - type: web
+    plan: free
+    name: server
+    runtime: node
+    region: frankfurt
+    buildCommand: cd server && npm install && npm run build
+    startCommand: cd server && npm run start:prod
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: API_KEY
+        sync: false
+      - key: NODE_ENV
+        value: production
+
+envVarGroups:
+  - name: common-settings
+    envVars:
+      - key: NODE_VERSION
+        value: 18.0.0
+
+globals:
+  - key: NODE_VERSION
+    value: 18.0.0
