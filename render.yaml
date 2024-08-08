@@ -33,7 +33,3 @@ envVarGroups:
     envVars:
       - key: NODE_VERSION
         value: 18.0.0
-
-globals:
-  - key: NODE_VERSION
-    value: 18.0.0
