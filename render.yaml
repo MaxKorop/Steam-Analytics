@@ -23,7 +23,7 @@ services:
     startCommand: cd server && npm run start:prod
     envVars:
       - key: PORT
-        value: 8080
+        value: 3000
       - key: API_KEY
         sync: false
 
