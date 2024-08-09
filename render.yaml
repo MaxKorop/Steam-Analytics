@@ -5,7 +5,7 @@ services:
     runtime: node
     region: frankfurt
     buildCommand: cd client && npm install && npm run build
-    startCommand: cd server && npm run production
+    startCommand: cd client && npm run production
     envVars:
       - key: VITE_API_URL
         fromService:
