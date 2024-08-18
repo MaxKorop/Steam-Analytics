@@ -16,12 +16,9 @@ export class StatsController {
       name
     }: RequestQuery
   ) {
-    // console.log(await this.statsService.getSteamSubscribers(name));
-    // return {
-    //   name,
-    //   subscribers: {},
-    //   socialMediaEvents: {}
-    // }
-    return await this.statsService.getSteamSubscribers(name);
+    return {
+      mentions: await this.socialMediaService.getMention(name),
+      followers: await this.statsService.getSteamSubscribers(name),
+    };
   }
 }

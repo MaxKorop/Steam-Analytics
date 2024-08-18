@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import puppeteer, { Browser, Page, executablePath } from 'puppeteer';
 import { PuppeteerExtra } from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
-import { AppFromList, Point, APIResponse } from 'src/interfaces/interfaces';
+import { AppFromList, Point, SteamAPIResponse } from 'src/interfaces/interfaces';
 
 @Injectable()
 export class StatsService {
@@ -14,7 +14,7 @@ export class StatsService {
     const url: string = this.getSteamDbUrl(gameId);
     
     console.log('Getting followers history...');
-    const statsData: APIResponse = await this.getStats(url);
+    const statsData: SteamAPIResponse = await this.getStats(url);
 
     console.log('Formatting followers history...');
     const formattedStats: Point[] = this.formatStats(statsData);
@@ -37,7 +37,7 @@ export class StatsService {
     return `https://steamdb.info/app/${id}/charts/#followers`;
   }
 
-  private async getStats(url: string): Promise<APIResponse> {
+  private async getStats(url: string): Promise<SteamAPIResponse> {
     const puppeteerExtra: PuppeteerExtra = new PuppeteerExtra(puppeteer);
     puppeteerExtra.use(StealthPlugin());
 
@@ -68,7 +68,7 @@ export class StatsService {
     return chartData;
   }
 
-  private formatStats(stats: APIResponse): Point[] {
+  private formatStats(stats: SteamAPIResponse): Point[] {
     const { start, step, values } = stats.data;
 
     const result: Point[] = values.map((value, i) => {
