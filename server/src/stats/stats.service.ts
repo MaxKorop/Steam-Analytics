@@ -1,0 +1,81 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import puppeteer, { Browser, Page, executablePath } from 'puppeteer';
+import { PuppeteerExtra } from 'puppeteer-extra';
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+import { AppFromList, Point, APIResponse } from 'src/interfaces/interfaces';
+
+@Injectable()
+export class StatsService {
+  public async getSteamSubscribers(name: string): Promise<any> {
+    const { applist: appList } = await fetch('https://api.steampowered.com/ISteamApps/GetAppList/v2/').then(response => response.json());
+    
+    const gameId: number = await this.getGameSteamId(name, appList);
+    console.log(`Game id found: ${gameId}`);
+    const url: string = this.getSteamDbUrl(gameId);
+    
+    console.log('Getting followers history...');
+    const statsData: APIResponse = await this.getStats(url);
+
+    console.log('Formatting followers history...');
+    const formattedStats: Point[] = this.formatStats(statsData);
+    console.log('Done!');
+    
+    return formattedStats;
+  }
+
+  private async getGameSteamId(gameName: string, appList: { apps: AppFromList[] }): Promise<number> {
+    const app: AppFromList | undefined = appList.apps.find((app) => app.name === gameName);
+    
+    if (!app) {
+      throw new NotFoundException("Game not found.")
+    }
+
+    return app.appid;
+  }
+
+  private getSteamDbUrl(id: number): string {
+    return `https://steamdb.info/app/${id}/charts/#followers`;
+  }
+
+  private async getStats(url: string): Promise<APIResponse> {
+    const puppeteerExtra: PuppeteerExtra = new PuppeteerExtra(puppeteer);
+    puppeteerExtra.use(StealthPlugin());
+
+    const browser: Browser = await puppeteerExtra.launch({
+      headless: true,
+      browser: 'chrome',
+      executablePath: executablePath()
+    });
+
+    const page: Page = await browser.newPage();
+
+    await page.setJavaScriptEnabled(true);
+    await page.setViewport({ width: 1200, height: 800, deviceScaleFactor: 1, isMobile: false });
+
+    let chartData: { success: boolean, data: { start: number, step: number, values: number[] } };
+
+    page.on('response', async (response) => {
+      if (response.url().includes('/api/GetGraphFollowers')) {
+        chartData = await response.json();
+      }
+    });
+    
+    await page.goto(url, { waitUntil: 'networkidle2' });
+
+    await page.close();
+    await browser.close();
+
+    return chartData;
+  }
+
+  private formatStats(stats: APIResponse): Point[] {
+    const { start, step, values } = stats.data;
+
+    const result: Point[] = values.map((value, i) => {
+      const date = new Date(start * 1000 + i * step * 1000).toISOString().slice(0, 10); // Transforming UNIX timestamps
+      return { date, followers: value };
+    });
+    
+    return result;
+  }
+}
