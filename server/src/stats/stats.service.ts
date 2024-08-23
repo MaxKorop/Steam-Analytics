@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import puppeteer, { Browser, Page } from 'puppeteer';
+import puppeteer, { Browser, Page, executablePath } from 'puppeteer';
 import { PuppeteerExtra } from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { AppFromList, Point, SteamAPIResponse } from 'src/interfaces/interfaces';
