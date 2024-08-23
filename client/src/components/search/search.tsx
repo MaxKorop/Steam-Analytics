@@ -2,6 +2,7 @@ import React from "react"
 import { Button, DatePicker, Flex, Input, Spin } from "antd";
 import dayjs, { Dayjs } from "dayjs";
 import { DateFilter, SearchProps } from "../../interfaces/interfaces";
+import styles from './styles.module.css';
 
 const Search: React.FC<SearchProps> = ({ gameName, setFilterDates, onSearch, isLoading, error }) => {
   const handleDateChange = (date: Dayjs | null, dateType: 'from' | 'to') => {
@@ -13,17 +14,17 @@ const Search: React.FC<SearchProps> = ({ gameName, setFilterDates, onSearch, isL
 
   return (
     <Flex vertical style={{ padding: "50px 0" }} justify="space-between">
-      <span style={{ marginLeft: 15, fontSize: 14 }}>{error ? error.message : "Input the same game name as in the Steam"}</span>
-      <Flex style={{ width: "100%", height: "50%", margin: 10 }}>
+      <span className={styles["message"]} style={error ? { color: "crimson" } : { color: "darkgrey" }}>{error ? error.message : "Input the same game name as in the Steam"}</span>
+      <Flex className={styles["container__horizontal"]}>
         <Input ref={gameName} style={{ marginRight: 10 }} />
         <Button
           onClick={() => !isLoading && onSearch()}
-          style={{ width: 100, marginLeft: 10 }}
+          className={styles["button"]}
         >
           {!isLoading ? "Get stats!" : <Spin />}
         </Button>
       </Flex>
-      <Flex justify="space-around" style={{ width: "100%", height: "50%", margin: 10 }}>
+      <Flex justify="space-around" className={styles["container__horizontal"]}>
         <DatePicker
           placeholder="From"
           onChange={(date: Dayjs | null) => handleDateChange(date, 'from')}
