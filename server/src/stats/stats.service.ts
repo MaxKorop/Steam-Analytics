@@ -36,20 +36,19 @@ export class StatsService {
   private async getStats(url: string): Promise<SteamAPIResponse> {
     const puppeteerExtra: PuppeteerExtra = new PuppeteerExtra(puppeteer);
     puppeteerExtra.use(StealthPlugin());
-  
+
     const browser: Browser = await puppeteerExtra.launch({
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome',
+      browser: 'chrome'
     });
-  
+
     const page: Page = await browser.newPage();
-  
+
     await page.setJavaScriptEnabled(true);
     await page.setViewport({ width: 1200, height: 800, deviceScaleFactor: 1, isMobile: false });
-  
+
     let chartData: { success: boolean, data: { start: number, step: number, values: number[] } };
-  
+
     page.on('response', async (response) => {
       if (response.url().includes('/api/GetGraphFollowers')) {
         chartData = await response.json();
@@ -57,10 +56,10 @@ export class StatsService {
     });
     
     await page.goto(url, { waitUntil: 'networkidle2' });
-  
+
     await page.close();
     await browser.close();
-  
+
     return chartData;
   }
 
