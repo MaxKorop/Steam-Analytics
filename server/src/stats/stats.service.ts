@@ -6,21 +6,17 @@ import { AppFromList, Point, SteamAPIResponse } from 'src/interfaces/interfaces'
 
 @Injectable()
 export class StatsService {
-  public async getSteamSubscribers(name: string): Promise<any> {
+  public async getSteamSubscribers(name: string, from?: string, to?: string): Promise<Point[]> {
     const { applist: appList } = await fetch('https://api.steampowered.com/ISteamApps/GetAppList/v2/').then(response => response.json());
     
     const gameId: number = await this.getGameSteamId(name, appList);
-    console.log(`Game id found: ${gameId}`);
     const url: string = this.getSteamDbUrl(gameId);
     
-    console.log('Getting followers history...');
     const statsData: SteamAPIResponse = await this.getStats(url);
 
-    console.log('Formatting followers history...');
     const formattedStats: Point[] = this.formatStats(statsData);
-    console.log('Done!');
     
-    return formattedStats;
+    return from || to ? this.filterStats(formattedStats, from, to) : formattedStats;
   }
 
   private async getGameSteamId(gameName: string, appList: { apps: AppFromList[] }): Promise<number> {
@@ -77,5 +73,19 @@ export class StatsService {
     });
     
     return result;
+  }
+
+  private filterStats(followersData: Point[], from?: string, to?: string): Point[] {
+    return followersData.filter(followersPoint => {
+
+      if (from && to) {
+        return new Date(followersPoint.date).getTime() > new Date(from).getTime()
+          && new Date(followersPoint.date).getTime() < new Date(to).getTime(); 
+      } else if (from) {
+        return new Date(followersPoint.date).getTime() > new Date(from).getTime(); 
+      } if (to) {
+        return new Date(followersPoint.date).getTime() < new Date(to).getTime(); 
+      }
+    })
   }
 }

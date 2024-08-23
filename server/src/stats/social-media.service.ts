@@ -5,7 +5,7 @@ import { Mention, RedditAPIResponse } from 'src/interfaces/interfaces';
 export class SocialMediaService {
   private redditUrl: string = "https://oauth.reddit.com/search.json?q=";
 
-  public async getMention(name: string): Promise<Mention[]> {
+  public async getMention(name: string, minDate: string, maxDate: string): Promise<Mention[]> {
 
     const authString = `${process.env.APP_ID}:${process.env.APP_SECRET}`;
     const base64Auth = Buffer.from(authString).toString('base64');
@@ -26,6 +26,9 @@ export class SocialMediaService {
     
     headers['Authorization'] = `bearer ${accessToken}`;
 
+    const minDateTimeStamp = new Date(minDate).getTime() / 1000;
+    const maxDateTimestamp = new Date(maxDate).getTime() / 1000;
+
     const response = await fetch(this.redditUrl + name, {
       method: 'GET',
       headers
@@ -34,9 +37,16 @@ export class SocialMediaService {
 
     const { data } = this.toCamelCase(apiResponse); 
 
-    const mentions = data.children.map(mention => mention.data);
+    const mentions = this.filterResults(data.children.map(mention => mention.data), minDateTimeStamp, maxDateTimestamp);
 
     return mentions;
+  }
+
+  private filterResults(response: Mention[], minDateTimeStamp: number, maxDateTimestamp: number): Mention[] {
+    return response.filter(mention => (
+      (minDateTimeStamp <= (new Date(mention.created).getTime() / 1000)) &&
+      ((new Date(mention.created).getTime() / 1000) <= maxDateTimestamp))
+    );
   }
 
   private toCamelCase(apiResponse: any): RedditAPIResponse {
@@ -47,7 +57,7 @@ export class SocialMediaService {
         children: apiResponse.data.children.map((child: any) => ({
           data: {
             title: child.data.title,
-            createdUtc: child.data.created_utc,
+            created: new Date(child.data.created_utc * 1000).toISOString().slice(0, 10),
             selftext: child.data.selftext,
             author: child.data.author,
             ups: child.data.ups,

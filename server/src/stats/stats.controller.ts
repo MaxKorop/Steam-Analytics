@@ -13,12 +13,20 @@ export class StatsController {
   @Get()
   async getStats(
     @Query() {
-      name
+      name,
+      from,
+      to
     }: RequestQuery
   ) {
+    const followers = await this.statsService.getSteamSubscribers(name, from, to);
+    const mentions = await this.socialMediaService.getMention(name,
+      followers[0].date,
+      followers[followers.length - 1].date
+    );
+
     return {
-      mentions: await this.socialMediaService.getMention(name),
-      followers: await this.statsService.getSteamSubscribers(name),
+      mentions,
+      followers,
     };
   }
 }
