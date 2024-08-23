@@ -23,7 +23,7 @@ export class StatsService {
     const app: AppFromList | undefined = appList.apps.find((app) => app.name === gameName);
     
     if (!app) {
-      throw new NotFoundException("Game not found.")
+      throw new NotFoundException("Game not found")
     }
 
     return app.appid;
