@@ -39,7 +39,8 @@ export class StatsService {
 
     const browser: Browser = await puppeteerExtra.launch({
       headless: true,
-      browser: 'chrome'
+      browser: 'chrome',
+      executablePath: executablePath()
     });
 
     const page: Page = await browser.newPage();
