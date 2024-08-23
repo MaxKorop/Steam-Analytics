@@ -1,6 +1,6 @@
 export interface Mention {
   title: string;
-  createdUtc: number;
+  created: string;
   selftext: string;
   author: string;
   ups: number;
