@@ -40,7 +40,7 @@ export class StatsService {
     const browser: Browser = await puppeteerExtra.launch({
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/google-chrome',
     });
   
     const page: Page = await browser.newPage();
