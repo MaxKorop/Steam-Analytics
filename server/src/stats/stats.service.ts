@@ -3,6 +3,7 @@ import puppeteer, { Browser, Page } from 'puppeteer';
 import { PuppeteerExtra } from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { AppFromList, Point, SteamAPIResponse } from 'src/interfaces/interfaces';
+import Chromium from 'chrome-aws-lambda';
 
 @Injectable()
 export class StatsService {
@@ -39,8 +40,9 @@ export class StatsService {
   
     const browser: Browser = await puppeteerExtra.launch({
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+      args: Chromium.args,
+      executablePath: await Chromium.executablePath,
+      defaultViewport: Chromium.defaultViewport,
     });
   
     const page: Page = await browser.newPage();
